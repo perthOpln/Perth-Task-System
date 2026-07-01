@@ -71,7 +71,7 @@
         .profile-avatar {
             width: 90px;
             height: 90px;
-            border-radius: 50%; /* Rounded profile icons for iOS feel */
+            border-radius: 50%; 
             background: #27272a;
             display: flex;
             align-items: center;
@@ -316,6 +316,7 @@
 </head>
 <body>
 
+<!-- User Profile Grid Grid Selector Screen Entry Point -->
 <div class="profile-container" id="viewProfiles">
     <h1>Who's tracking?</h1>
     <div class="profile-grid" id="profileGridList">
@@ -323,6 +324,7 @@
     </div>
 </div>
 
+<!-- Minimalist iPhone Lockscreen Entry Gate -->
 <div class="profile-container hidden" id="viewLoginGate">
     <div class="ios-lockscreen-gate" id="lockscreenWrapper">
         <h2 id="loginTitle">Enter PIN</h2>
@@ -356,6 +358,7 @@
     </div>
 </div>
 
+<!-- Minimalist Profile Creation Account Entry Gate -->
 <div class="profile-container hidden" id="viewRegisterGate">
     <div class="ios-lockscreen-gate" id="registerWrapper">
         <h2>Create Workspace</h2>
@@ -392,6 +395,7 @@
     </div>
 </div>
 
+<!-- Main Core Application Telemetry View Dashboard Grid -->
 <div class="dashboard-grid hidden" id="viewDashboard">
     <div class="matrix-container">
         <div class="header-section">
@@ -438,7 +442,7 @@
         </div>
 
         <div class="chart-header-wrapper">
-            <h2 id="chartTitle">Clean Velocity Map</h2>
+            <h2 id="chartTitle">Velocity Comparison Map</h2>
             <div class="chart-controls">
                 <button class="control-btn active" id="btn-daily" onclick="changeChartMode('daily')">Day</button>
                 <button class="control-btn" id="btn-monthly" onclick="changeChartMode('monthly')">Month</button>
@@ -457,6 +461,7 @@
     </div>
 </div>
 
+<!-- Modal Dialog box for precise targeting context visualization -->
 <div class="modal-overlay hidden" id="cellModal" onclick="closeCellModal()">
     <div class="modal-card" onclick="event.stopPropagation()">
         <div class="modal-title" id="modalDateLabel">YYYY-MM-DD</div>
@@ -478,6 +483,13 @@
     let maxDailyPossibleXP = 120;
     let isEditMode = false;
     const avatarThemes = ['avatar-blue', 'avatar-green', 'avatar-purple', 'avatar-orange', 'avatar-teal'];
+
+    // Distinct theme styling for chart modes
+    const neonColors = {
+        daily: { fill: 'rgba(6, 182, 212, 0.85)', border: '#06b6d4' },      // Cyan
+        monthly: { fill: 'rgba(168, 85, 247, 0.85)', border: '#a855f7' },    // Purple
+        yearly: { fill: 'rgba(16, 185, 129, 0.85)', border: '#10b981' }      // Emerald
+    };
 
     function getTodayString() {
         const today = new Date();
@@ -527,7 +539,6 @@
         }
     }
 
-    /* iPhone Login Lock Screen Implementation Logic Gateway */
     function showLoginGate(user) {
         activeUsername = user;
         document.getElementById('loginTitle').innerText = `${user}`;
@@ -538,7 +549,6 @@
         updatePinDots(0, 'dot-');
         
         switchActiveScreen('viewLoginGate');
-        // Instantly capture numeric focus pipeline natively
         pwdField.focus();
     }
 
@@ -580,13 +590,11 @@
         const pwd = pwdField.value;
         activePassword = pwd;
         
-        // Temporarily render standard authentication intercept view status
         document.getElementById('loginSubtitle').innerText = "Decrypting verification tokens...";
         
         const verificationStatus = await reloadDashboardDataset();
         
         if(!verificationStatus) {
-            // Failure routine: Trigger physical iOS shake mechanism
             const wrapper = document.getElementById('lockscreenWrapper');
             wrapper.classList.add('shake-err');
             document.getElementById('loginSubtitle').innerText = "Incorrect security PIN. Retry.";
@@ -599,7 +607,6 @@
         }
     }
 
-    /* Account Registration Layout Flow Keypad Functions */
     function showRegisterGate() {
         document.getElementById('regUserField').value = "";
         const pwdField = document.getElementById('regPwdField');
@@ -637,7 +644,7 @@
         const pwd = pwdField.value;
         
         if(!user) {
-            alert("Profile handle name is mandatory before checking code matrix credentials.");
+            alert("Profile handle name is mandatory.");
             pwdField.value = "";
             updatePinDots(0, 'regdot-');
             return;
@@ -828,7 +835,7 @@
             if (localStorage.getItem(uniqueId) === 'true') todayEarnedXP += taskObj.xp;
         });
         const percentage = maxDailyPossibleXP > 0 ? Math.round((todayEarnedXP / maxDailyPossibleXP) * 100) : 0;
-        applyDynamicMatrixTheme(percentage);
+        applyDynamicTheme = applyDynamicMatrixTheme(percentage);
         document.getElementById('metricsBadge').innerText = `${todayEarnedXP} / ${maxDailyPossibleXP} XP [${percentage}%]`;
         document.getElementById('progressBar').style.width = `${percentage}%`;
 
@@ -846,14 +853,13 @@
         }
     }
 
-    /* Combined Chart Mode Switching Engine Matrix Modification */
     function changeChartMode(mode) {
         currentChartMode = mode;
         document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.telemetry-card').forEach(c => c.style.borderColor = 'var(--border-color)');
         
         document.getElementById(`btn-${mode}`).classList.add('active');
-        document.getElementById(`card-${mode}`).style.borderColor = 'var(--current-theme)';
+        document.getElementById(`card-${mode}`).style.borderColor = neonColors[mode].border;
         
         renderTelemetryAndCharts(globalHistory);
     }
@@ -884,16 +890,16 @@
         document.getElementById('statYearVolume').innerText = yearCount;
 
         let labels = [], dataValues = [];
+        const activeColorMode = neonColors[currentChartMode];
 
         if (currentChartMode === 'daily') {
-            document.getElementById('chartTitle').innerText = "Clean Velocity Map (Last 7 Days)";
-            // Take trailing 7 array rows for parsing metric values
+            document.getElementById('chartTitle').innerText = "Velocity Bar Chart (Last 7 Days)";
             const sorted = Object.keys(dailyMap).sort().slice(-7);
             labels = sorted.map(d => d.substring(5));
             dataValues = sorted.map(d => dailyMap[d]);
         } 
         else if (currentChartMode === 'monthly') {
-            document.getElementById('chartTitle').innerText = "Monthly Velocity Distribution";
+            document.getElementById('chartTitle').innerText = "Monthly Comparison Array";
             const monthBuckets = Array(12).fill(0);
             historyData.forEach(row => {
                 const parts = row.date.split('-');
@@ -906,7 +912,7 @@
             dataValues = monthBuckets;
         } 
         else if (currentChartMode === 'yearly') {
-            document.getElementById('chartTitle').innerText = "Yearly Volume Distribution";
+            document.getElementById('chartTitle').innerText = "Yearly Volume Comparison";
             const yearBuckets = {};
             historyData.forEach(row => {
                 const parts = row.date.split('-');
@@ -921,18 +927,19 @@
 
         const ctx = document.getElementById('productivityChart').getContext('2d');
         if (chartInstance) chartInstance.destroy();
+        
+        // Re-engineered into a highly visible Vertical Bar Chart
         chartInstance = new Chart(ctx, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{ 
                     data: dataValues, 
-                    borderColor: document.documentElement.style.getPropertyValue('--current-theme') || '#06b6d4', 
-                    borderWidth: 1.5, 
-                    fill: false, 
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    tension: 0.15
+                    backgroundColor: activeColorMode.fill, 
+                    borderColor: activeColorMode.border, 
+                    borderWidth: 2,
+                    borderRadius: 4,
+                    barPercentage: 0.6
                 }]
             },
             options: { 
@@ -940,8 +947,14 @@
                 maintainAspectRatio: false, 
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { grid: { color: '#1c1c1f' }, ticks: { color: '#71717a' } },
-                    x: { grid: { display: false }, ticks: { color: '#71717a' } }
+                    y: { 
+                        grid: { color: '#1c1c1f' }, 
+                        ticks: { color: '#e4e4e7', font: { family: 'monospace', size: 10 } } 
+                    },
+                    x: { 
+                        grid: { display: false }, 
+                        ticks: { color: '#e4e4e7', font: { weight: 'bold', size: 11 } } 
+                    }
                 }
             }
         });
@@ -949,16 +962,14 @@
         renderHeatmap(historyData, dailyPctMap);
     }
 
-    /* Render Calendar Grid Syncing Dynamically with Time Scale Modifiers */
     function renderHeatmap(historyData, dailyPctMap) {
         const grid = document.getElementById('heatmapGrid');
         grid.innerHTML = "";
         
-        let cellCount = 28; // Standard fallback view range limit
+        let cellCount = 28; 
         if (currentChartMode === 'monthly') cellCount = 30;
         else if (currentChartMode === 'yearly') cellCount = 365;
 
-        // Dynamic multi-column responsive layout mapping configurations
         if(cellCount <= 30) {
             grid.style.gridTemplateColumns = "repeat(7, 1fr)";
             document.getElementById('heatmapTitle').innerText = `Matrix Consistency Array (Last ${cellCount} Days)`;
@@ -966,6 +977,9 @@
             grid.style.gridTemplateColumns = "repeat(21, 1fr)";
             document.getElementById('heatmapTitle').innerText = "Matrix Consistency Array (Full Annual Horizon)";
         }
+
+        const dailyMap = {};
+        historyData.forEach(row => { if (row.date) dailyMap[row.date] = row.xp; });
 
         for (let i = cellCount - 1; i >= 0; i--) {
             const target = new Date();
@@ -989,7 +1003,6 @@
                 else cell.classList.add('filled-fail');
             }
             
-            // Interactive modal visualization triggers
             cell.onclick = () => {
                 document.querySelectorAll('.heatmap-cell').forEach(c => c.classList.remove('active-focus'));
                 cell.classList.add('active-focus');
